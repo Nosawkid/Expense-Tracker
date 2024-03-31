@@ -1,0 +1,56 @@
+<h1>Welcome <%= user.username %></h1>
+
+
+
+<form action="/expense/<%= user._id %>" method="post">
+    <div>
+        <label for="income">Enter Income</label>
+        <input id="income" type="text" name="income">
+    </div>
+    <div>
+        <label for="expense">Enter Expense</label>
+        <input id="expense" type="text" name="expense">
+    </div>
+    <button>Submit</button>
+</form>
+
+
+<div>
+    <h2>Total Income : <span id="totalIncome">
+        ₹<%= totalIncome %>
+        </span></h2>
+    <h2>Total Expense : ₹<%= totalExpense %>
+    </h2>
+
+    <h2>Amount in hand : ₹<%= user.totalAmount %></h2>
+</div>
+
+<h2>Recent Transactions</h2>
+<table border="2">
+    <thead>
+        <tr>
+            <th>SI No</th>
+            <th>Transaction</th>
+            <th>Transaction Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% for(let i=0; i < filteredTransactions.length; i++) {%>
+            <tr>
+                <td>
+                    <%= i + 1 %>
+                </td>
+                <td style='<%= filteredTransactions[i].income ? 'color: green; font-weight: bold;' : (filteredTransactions[i].expense ? 'color: red; font-weight: bold;' : '') %>'>
+                    <%= filteredTransactions[i].income || filteredTransactions[i].expense %>
+                  </td>
+                  
+                
+                <td>
+                    <%= filteredTransactions[i].date %>
+                </td>
+            </tr>
+            <% } %>
+    </tbody>
+</table>
+<a href="/">Go Back</a>
+<form method="post" action="/user/logout"><Button>Logout</Button></form>
