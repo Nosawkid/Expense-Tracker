@@ -2,13 +2,14 @@ const express = require("express")
 const router = express.Router()
 const bcrypt = require("bcrypt")
 const User = require("../models/user")
+const CustomError = require("../utils/customeError")
 
 router.get("/",(req,res)=>{
     res.render("user/register")
 })
 
 
-router.post("/",async(req,res)=>{
+router.post("/",async(req,res,next)=>{
 
     try {
         const {
@@ -17,7 +18,9 @@ router.post("/",async(req,res)=>{
         const existing = await User.findOne({$or:[{username},{userEmail}]})
         if(existing)
         {
-           return  res.status(400).send({message:"User Already Exists"})
+           req.flash("error","User already exists")
+           return res.redirect("/user")
+           
         }
 
         const salt = await bcrypt.genSalt(16)
@@ -34,7 +37,7 @@ router.post("/",async(req,res)=>{
        
     } catch (error) {
         console.log(error.message)
-        res.status(400).send({message:"Something went wrong, check the console"})
+        next(error)
     }
 })
 
@@ -59,7 +62,8 @@ router.post("/login",async(req,res)=>{
     }
     else
     {
-        res.redirect("/user/login")
+        req.flash("error","Invalid Credentials")
+        return res.redirect("/user/login")
     }
 
    } catch (error) {

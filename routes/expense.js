@@ -5,7 +5,7 @@ const User = require("../models/user.js")
 const moment = require("moment")
 const requireLogin = require("../middleware/middleware.js")
 const mongoose = require("mongoose")
-const ObjectId = mongoose.Types.ObjectId
+const CustomError = require("../utils/customeError.js")
 
 
 
@@ -14,7 +14,8 @@ const ObjectId = mongoose.Types.ObjectId
 
 
 
-router.get("/",requireLogin,async(req,res)=>{
+
+router.get("/",requireLogin,async(req,res,next)=>{
     try {
         const user = await User.findById(req.session.uid)
 
@@ -32,7 +33,7 @@ router.get("/",requireLogin,async(req,res)=>{
             }
         ])
 
-        console.log(totalIncome)
+        
 
         if(totalIncome.length > 0)
         {
@@ -105,6 +106,8 @@ router.get("/",requireLogin,async(req,res)=>{
         res.render("expense/index",{totalIncome,totalExpense,filteredTransactions,user})
     } catch (error) {
         console.log(error.message)
+        next(new CustomError(error.message,400))
+    
     }
 })
 
@@ -112,7 +115,7 @@ router.get("/",requireLogin,async(req,res)=>{
 
 
 
-router.post("/:id", async (req, res) => {
+router.post("/:id",requireLogin, async (req, res,next) => {
     try {
         let { income, expense, incomeDate, expenseDate } = req.body;
         const {id} = req.params
@@ -120,7 +123,8 @@ router.post("/:id", async (req, res) => {
         expense = expense === "" ? 0 :expense
 
         const user = await User.findById(id)
-        if(!user) return res.status(401).send({message:"No user found"})
+        if(!user) return next(new CustomError("No user found",401))
+         
 
         const newData = new Expense({
             income,

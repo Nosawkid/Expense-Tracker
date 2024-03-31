@@ -1,19 +1,23 @@
+<% layout("./layouts/boilerplate") %>
 <h1>Register User</h1>
 
 
 <form action="/user" method="post">
-    <div>
+    <div class="form-group">
         <label for="username">User Name</label>
-        <input type="text" id="username" name="username">
+        <input class="form-control" type="text" id="username" name="username">
     </div>
-    <div>
+    <div class="form-group">
         <label for="userEmail">Email</label>
-        <input type="email" id="userEmail" name="userEmail">
+        <input class="form-control" type="email" id="userEmail" name="userEmail">
     </div>
-    <div>
+    <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" name="userPassword">
+        <input class="form-control" type="password" id="password" name="userPassword">
     </div>
 
-    <button>Submit</button>
+    <button class="btn btn-primary mt-3">Submit</button>
 </form>
+
+
+<a href="/" class="d-block mt-4">Go Back</a>

@@ -1,48 +1,57 @@
+<% layout("./layouts/boilerplate") %>
 <h1>Welcome <%= user.username %></h1>
 
 
 
+
 <form action="/expense/<%= user._id %>" method="post">
-    <div>
+   <div class="row">
+    <div class="form-group col-md-6 col-12">
         <label for="income">Enter Income</label>
-        <input id="income" type="text" name="income">
+        <input class="form-control" id="income" type="text" name="income">
     </div>
-    <div>
+    <div class="form-group col-md-6 col-12">
         <label for="expense">Enter Expense</label>
-        <input id="expense" type="text" name="expense">
+        <input class="form-control" id="expense" type="text" name="expense">
     </div>
-    <button>Submit</button>
+   </div>
+    <button class="btn btn-primary mt-3">Submit</button>
 </form>
 
 
 <div>
-    <h2>Total Income : <span id="totalIncome">
-        ₹<%= totalIncome %>
-        </span></h2>
-    <h2>Total Expense : ₹<%= totalExpense %>
-    </h2>
+    <div class="row mt-2">
+        <h4 class="col-md-3 text-muted">Total Income : <span class="text-success" id="totalIncome">
+            ₹<%= totalIncome.toLocaleString("en-IN") %>
+            </span></h4>
+        <h4 class="col-md-3 text-muted">Total Expense : <span class="text-danger"> ₹<%= totalExpense.toLocaleString("en-IN") %></span>
+        </h4>
+    </div>
 
-    <h2>Amount in hand : ₹<%= user.totalAmount %></h2>
+    <h4 class="text-center mt-3 display-1">Amount in hand : ₹<%= user.totalAmount.toLocaleString("en-IN") %></h4>
 </div>
 
-<h2>Recent Transactions</h2>
-<table border="2">
+<h4>Recent Transactions</h4>
+
+
+<table class="table table-dark">
     <thead>
         <tr>
-            <th>SI No</th>
-            <th>Transaction</th>
-            <th>Transaction Date</th>
+            <th scope="col">SI No</th>
+            <th scope="col">Transaction</th>
+            <th scope="col">Transaction Date</th>
         </tr>
     </thead>
     <tbody>
         <% for(let i=0; i < filteredTransactions.length; i++) {%>
-            <tr>
+            <tr class="<%= filteredTransactions[i].income ? "table-success" : "table-danger" %>">
                 <td>
                     <%= i + 1 %>
                 </td>
-                <td style='<%= filteredTransactions[i].income ? 'color: green; font-weight: bold;' : (filteredTransactions[i].expense ? 'color: red; font-weight: bold;' : '') %>'>
-                    <%= filteredTransactions[i].income || filteredTransactions[i].expense %>
+                <td>
+                    <%= (filteredTransactions[i].income || filteredTransactions[i].expense) ? (filteredTransactions[i].income || filteredTransactions[i].expense).toLocaleString("en-IN") : '' %>
                   </td>
+                  
                   
                 
                 <td>
@@ -52,5 +61,95 @@
             <% } %>
     </tbody>
 </table>
-<a href="/">Go Back</a>
-<form method="post" action="/user/logout"><Button>Logout</Button></form>
+
+<% const filteredTransactionsJSON = JSON.stringify(filteredTransactions); %>
+
+<div class="row">
+    <div class="col-md-6 col-12">
+        <canvas id="myChart"   data-filtered-transactions='<%= filteredTransactionsJSON %>'></canvas>
+    </div>
+    <div class="col-md-6 col-12">
+        <canvas id="myChart2"   data-filtered-transactions='<%= filteredTransactionsJSON %>'></canvas>
+    </div>
+</div>
+
+<form method="post" action="/user/logout"><Button class="btn btn-danger m-2">Logout</Button></form>
+
+
+
+
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Data for the chart
+    var canvas = document.getElementById('myChart');
+    var filteredTransactions = JSON.parse(canvas.getAttribute('data-filtered-transactions'));
+    var data = {
+      labels: filteredTransactions.map((ele) => ele.date),
+      datasets: [{
+        label: 'My Income Chart',
+        data: filteredTransactions.map((ele) => ele.income),
+        fill: false,
+        borderColor: 'green',
+        tension: 0.1
+      }]
+    };
+  
+    // Configuration options
+    var options = {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    };
+  
+    // Get the context of the canvas element
+    var ctx = document.getElementById('myChart').getContext('2d');
+  
+    // Create the chart
+    var myChart = new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: options
+    });
+  </script>
+<script>
+    // Data for the chart
+    var canvas = document.getElementById('myChart2');
+    var filteredTransactions = JSON.parse(canvas.getAttribute('data-filtered-transactions'));
+    var data = {
+      labels: filteredTransactions.map((ele) => ele.date),
+      datasets: [{
+        label: 'My Expense Chart',
+        data: filteredTransactions.map((ele) => ele.expense),
+        fill: false,
+        borderColor: 'red',
+        tension: 0.1
+      }]
+    };
+  
+    // Configuration options
+    var options = {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    };
+  
+    // Get the context of the canvas element
+    var ctx = document.getElementById('myChart2').getContext('2d');
+  
+    // Create the chart
+    var myChart = new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: options
+    });
+  </script>
