@@ -5,6 +5,8 @@ const path = require("path")
 const session = require("express-session")
 var flash = require('connect-flash');
 const engine = require("ejs-mate")
+const User = require("./models/user")
+const methodOverride = require("method-override")
 
 const Port = process.env.PORT || 3000
 const mongoose = require('mongoose');
@@ -31,13 +33,14 @@ app.use(session(sessionConfig))
 app.use(express.urlencoded({extended:true}))
 app.use(session(sessionConfig))
 app.use(flash())
-
-
+app.use(methodOverride("_method"))
 app.engine("ejs",engine)
 app.set("view engine","ejs")
 app.set("views",path.join(__dirname,"views"))
 
-app.use((req,res,next)=>{
+app.use(async(req,res,next)=>{
+    const user = await User.findById(req.session.uid)
+    res.locals.currentUser = user
     res.locals.success =  req.flash("success")
     res.locals.error = req.flash("error")
     next()

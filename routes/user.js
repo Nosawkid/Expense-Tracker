@@ -2,19 +2,35 @@ const express = require("express")
 const router = express.Router()
 const bcrypt = require("bcrypt")
 const User = require("../models/user")
-const CustomError = require("../utils/customeError")
+const {validateUser} = require("../middleware/middleware")
+const validator = require("validator")
 
 router.get("/",(req,res)=>{
+   
     res.render("user/register")
 })
 
 
-router.post("/",async(req,res,next)=>{
+router.post("/",validateUser,async(req,res,next)=>{
 
     try {
         const {
             username,userEmail,userPassword
         } = req.body
+
+        if(!username || !userEmail || userPassword)
+        {
+            req.flash("error","Please Fill all fields")
+            return res.redirect("/user")
+        }
+
+        if(!validator.isEmail(userEmail))
+        {
+            req.flash("error","Please enter a valid email")
+            return res.redirect("/user")
+        }
+
+
         const existing = await User.findOne({$or:[{username},{userEmail}]})
         if(existing)
         {
@@ -23,7 +39,7 @@ router.post("/",async(req,res,next)=>{
            
         }
 
-        const salt = await bcrypt.genSalt(16)
+        const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(userPassword,salt)
 
         const newUser = new User({
@@ -33,6 +49,7 @@ router.post("/",async(req,res,next)=>{
         })
 
         await newUser.save()
+        req.flash("success","You are successfully registered")
         res.redirect("/")
        
     } catch (error) {

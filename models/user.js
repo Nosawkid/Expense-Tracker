@@ -4,6 +4,7 @@ const validator = require("validator")
 const bcrypt = require("bcrypt")
 
 
+
 const userSchema = new Schema({
     username:{
         type:String,
@@ -29,7 +30,7 @@ const userSchema = new Schema({
     totalAmount:{
         type:Number,
         default:0,
-        min:0
+        
     }
 })
 

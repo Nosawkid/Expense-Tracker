@@ -4,8 +4,8 @@ const Expense = require("../models/expense.js")
 const User = require("../models/user.js")
 const moment = require("moment")
 const requireLogin = require("../middleware/middleware.js")
-const mongoose = require("mongoose")
 const CustomError = require("../utils/customeError.js")
+
 
 
 
@@ -112,7 +112,28 @@ router.get("/",requireLogin,async(req,res,next)=>{
 })
 
 
+router.delete("/:id",requireLogin,async(req,res)=>{
+    try {
+        const {id} = req.params
+        const item = await Expense.findById(id)
+        const user = await User.findById(req.session.uid)
+        if(item.income)
+        {
+            user.totalAmount -= item.income
+        }
+        if(item.expense)
+        {
+            user.totalAmount += item.expense
+        }
 
+        await Expense.findByIdAndDelete(id)
+        await user.save()
+        req.flash("success","Data Deleted successfully")
+        res.redirect("/expense")
+    } catch (error) {
+       console.log(error.message) 
+    }
+})
 
 
 router.post("/:id",requireLogin, async (req, res,next) => {
@@ -121,6 +142,17 @@ router.post("/:id",requireLogin, async (req, res,next) => {
         const {id} = req.params
         income = income === "" ? 0 : income
         expense = expense === "" ? 0 :expense
+
+        if(income < 0)
+        {
+            req.flash("error","Income must be greater than 0")
+            return res.redirect("/expense")
+        }
+        if(expense < 0)
+        {
+            req.flash("error","Expense must be greater than 0")
+            return res.redirect("/expense")
+        }
 
         const user = await User.findById(id)
         if(!user) return next(new CustomError("No user found",401))
@@ -139,12 +171,14 @@ router.post("/:id",requireLogin, async (req, res,next) => {
         
         await newData.save();
         await user.save()
+        req.flash("success","Data added successfully")
         res.status(200).redirect("/expense");
     } catch (error) {
         console.log(error.message);
         res.status(400).send({ message: "Something went wrong" });
     }
 });
+
 
 
 
